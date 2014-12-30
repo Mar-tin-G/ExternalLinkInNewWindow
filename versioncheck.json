@@ -1,0 +1,10 @@
+{
+	"unstable": {
+		"1.0": {
+			"current": "1.0.0-beta1",
+			"download": "https://github.com/Martin-G-/ExternalLinkInNewWindow",
+			"eol": null,
+			"security": false
+		}
+	}
+}

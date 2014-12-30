@@ -1,0 +1,29 @@
+{
+	"name": "martin/externallinkinnewwindow",
+	"type": "phpbb-extension",
+	"description": "Modifies external links to open in a new browser window by default.",
+	"homepage": "https://github.com/Martin-G-/ExternalLinkInNewWindow",
+	"version": "1.0.0-beta1",
+	"time": "2014-12-30",
+	"license": "GPL-2.0",
+	"authors": [{
+		"name": "Martin",
+		"email": "martin.g@posteo.de",
+		"role": "Lead Developer"
+	}],
+	"require": {
+		"php": ">=5.3.3",
+		"composer/installers": "~1.0"
+	},
+	"extra": {
+		"display-name": "External Link In New Window",
+		"soft-require": {
+			"phpbb/phpbb": ">=3.1.2,<3.2.*@dev"
+		},
+		"version-check": {
+			"host": "github.com",
+			"directory": "/Martin-G-/ExternalLinkInNewWindow",
+			"filename": "versioncheck.json"
+		}
+	}
+}
