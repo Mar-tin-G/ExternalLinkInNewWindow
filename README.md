@@ -1,6 +1,6 @@
 # External Link In New Window
 
-[phpBB 3.1] (https://www.phpbb.com/) Extension External Link In New Window
+[phpBB 3.1](https://www.phpbb.com/) Extension External Link In New Window
 
 ## Description
 

@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - martin externallinkinnewwindow
-* @copyright (c) 2014 Martin ( https://github.com/Martin-G- )
+* @copyright (c) 2015 Martin ( https://github.com/Martin-G- )
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -23,7 +23,7 @@ class ucp implements EventSubscriberInterface
 	{
 		return array(
 			'core.ucp_prefs_personal_data'			=> 'ucp_get_pref',
-			'core.ucp_prefs_personal_update_data'	=> 'ucp_set_pref', 
+			'core.ucp_prefs_personal_update_data'	=> 'ucp_set_pref',
 		);
 	}
 
@@ -61,7 +61,7 @@ class ucp implements EventSubscriberInterface
 	* @param	object		$event	The event object
 	* @return	null
 	* @access	public
-	*/ 
+	*/
 	public function ucp_get_pref($event)
 	{
 		// only show UCP option when this is enabled in ACP
@@ -112,7 +112,7 @@ class ucp implements EventSubscriberInterface
 	* @param	object		$event	The event object
 	* @return	null
 	* @access	public
-	*/ 
+	*/
 	public function ucp_set_pref($event)
 	{
 		// only save UCP option when this is enabled in ACP

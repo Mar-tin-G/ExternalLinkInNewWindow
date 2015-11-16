@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - martin externallinkinnewwindow
-* @copyright (c) 2014 Martin ( https://github.com/Martin-G- )
+* @copyright (c) 2015 Martin ( https://github.com/Martin-G- )
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -70,7 +70,7 @@ class listener implements EventSubscriberInterface
 	* @param	object		$event	The event object
 	* @return	null
 	* @access	public
-	*/ 
+	*/
 	public function modify_external_links($event)
 	{
 		$text = $event['text'];
