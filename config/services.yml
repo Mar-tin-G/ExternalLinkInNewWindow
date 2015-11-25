@@ -1,17 +1,17 @@
 services:
-	martin.externallinkinnewwindow.listener:
-		class: martin\externallinkinnewwindow\event\listener
-		arguments:
-			- @config
-			- @user
-		tags:
-			- { name: event.listener }
-	martin.externallinkinnewwindow.ucp:
-		class: martin\externallinkinnewwindow\event\ucp
-		arguments:
-			- @config
-			- @user
-			- @request
-			- @template
-		tags:
-			- { name: event.listener }
+  martin.externallinkinnewwindow.listener:
+    class: martin\externallinkinnewwindow\event\listener
+    arguments:
+      - @config
+      - @user
+    tags:
+      - { name: event.listener }
+  martin.externallinkinnewwindow.ucp:
+    class: martin\externallinkinnewwindow\event\ucp
+    arguments:
+      - @config
+      - @user
+      - @request
+      - @template
+    tags:
+      - { name: event.listener }
