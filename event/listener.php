@@ -12,6 +12,8 @@ namespace martin\externallinkinnewwindow\event;
 /**
 * @ignore
 */
+use \phpbb\config\config;
+use \phpbb\user;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -27,19 +29,19 @@ class listener implements EventSubscriberInterface
 		);
 	}
 
-	/* @var \phpbb\config\config */
+	/* @var config */
 	protected $config;
 
-	/* @var \phpbb\user */
+	/* @var user */
 	protected $user;
 
 	/**
 	* Constructor
 	*
-	* @param \phpbb\config\config		$config
-	* @param \phpbb\user				$user
+	* @param config	$config
+	* @param user	$user
 	*/
-	public function __construct(\phpbb\config\config $config, \phpbb\user $user)
+	public function __construct(config $config, user $user)
 	{
 		$this->config = $config;
 		$this->user = $user;
@@ -61,9 +63,10 @@ class listener implements EventSubscriberInterface
 	}
 
 	/**
-	* Function to add the 'target="_blank"' attribute to HTML anchors (<a href="...">)
-	* that link an external resource, so user agents open this link in a new window.
-	* If enabled in ACP, this function does also add the 'rel="nofollow"' attribute.
+	* Add the 'target="_blank"' attribute to HTML anchors
+	*
+	* Only links to external resources are modified.
+	* If enabled in ACP, this function also adds the 'rel="nofollow"' attribute.
 	* NB: only the output to the visitors user agent is altered, the data in the
 	* database is unchanged.
 	*
@@ -98,36 +101,70 @@ class listener implements EventSubscriberInterface
 			))
 		)
 		{
-			// this rather long regular expression filters all links from the text that have
-			// the attribute 'class="postlink"' set, and saves the link (attribute 'href') for
-			// later parsing.
-			// The regular expression matches both attributes regardless of their order.
-			if (preg_match_all('#(<a[^>]*?(?>class="postlink"|href="([^"]+?)")[^>]*?(?>class="postlink"|href="([^"]+?)")[^>]*?)>([^<]+?)</a>#si', $text, $matches, PREG_SET_ORDER))
+			/*
+			 * search for all links with one expensive preg_match_all() call.
+			 * the regular expression matches:
+			 * <a ... class="... postlink ..." ... href="{HREF}" ...>{TEXT}</a>
+			 *
+			 * the $matches array then contains for each single match:
+			 * [0]        the full match
+			 * ['anchor'] the full opening anchor tag '<a ... ' (without the closing >) of the matched link
+			 * ['href']   the external link HREF
+			 * ['text']   the TEXT content of the <a> element
+			 */
+
+			// construct the regular expression:
+			// all characters that are not separators (i.e. that do not end attribute or element)
+			$not_sep = '[^"<>]*?';
+			// the class attribute must contain 'postlink', but there may be other classes appended or prepended
+			$class = $not_sep . 'postlink'. $not_sep;
+
+			if (preg_match_all('#'.
+				// we need the full opening anchor tag <a ... >
+				'(?P<anchor><a'.
+					// the attributes are in arbitrary order, separated by whitespace
+					'(?:\s+'.
+						// the attribute may be one of:
+						'(?:'.
+							// class: we need to match this
+							'class="'. $class .'"'.
+							'|'.
+							// href: we need to match this too
+							'href="(?P<href>[^"]+?)"'.
+							'|'.
+							// other attributes are not of interest to us
+							'\w+="'. $not_sep . '"'.
+						')'.
+					')+'.
+				')>'.
+				// we also need the link text <a ...>text</a>
+				// NB: do not use $not_sep here as the text may contain the " character
+				'(?P<text>[^<]+?)'.
+				'</a>#si',
+				$text, $matches, PREG_SET_ORDER)
+			)
 			{
 				foreach ($matches as $match)
 				{
-					$link_href = ($match[2] == '' ? $match[3] : $match[2]);
-					$link_text = $match[4];
-
 					// if you put an internal link in [url] tags, phpBB will mark them as "postlink",
 					// i.e. as an external link. So we have to filter out these internal links.
-					if (strpos($link_href, $board_url) === false)
+					if (strpos($match['href'], $board_url) === false)
 					{
-						// if the link already contains the 'target' attribute, replace it
-						if (preg_match('#target="[^"]+?"#si', $match[1]) === 1)
+						// if the link already contains the 'target' attribute, replace it; otherwise append it
+						if (preg_match('#target="[^"]+?"#si', $match['anchor']) === 1)
 						{
-							$link_anchor = preg_replace('#target="[^"]+?"#si', 'target="_blank"', $match[1]);
+							$link_anchor = preg_replace('#target="[^"]+?"#si', 'target="_blank"', $match['anchor']);
 						}
 						else
 						{
-							$link_anchor = $match[1] . ' target="_blank"';
+							$link_anchor = $match['anchor'] . ' target="_blank"';
 						}
 
 						// add the rel="nofollow" attribute, if enabled in ACP
 						if ($this->config['martin_extlinknewwin_add_ref'])
 						{
-							// replace existing 'rel' attribute
-							if (preg_match('#rel="[^"]+?"#si', $match[1]) === 1)
+							// replace existing 'rel' attribute or append it
+							if (preg_match('#rel="[^"]+?"#si', $link_anchor) === 1)
 							{
 								$link_anchor = preg_replace('#rel="[^"]+?"#si', 'rel="nofollow"', $link_anchor);
 							}
@@ -138,7 +175,7 @@ class listener implements EventSubscriberInterface
 						}
 
 						// finally replace the external link
-						$text = str_replace($match[0], $link_anchor . '>' . $link_text . '</a>', $text);
+						$text = str_replace($match[0], $link_anchor . '>' . $match['text'] . '</a>', $text);
 					}
 				}
 

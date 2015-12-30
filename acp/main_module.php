@@ -11,14 +11,14 @@ namespace martin\externallinkinnewwindow\acp;
 
 class main_module
 {
-	var $u_action;
+	public $u_action;
+	public $tpl_name;
+	public $page_title;
 
-	function main($id, $mode)
+	public function main($id, $mode)
 	{
-		global $db, $user, $auth, $template, $cache, $request;
-		global $config, $phpbb_root_path, $phpbb_admin_path, $phpEx;
+		global $user, $template, $request, $config;
 
-		$user->add_lang('acp/common');
 		$this->tpl_name = 'externallinkinnewwindow_body';
 		$this->page_title = $user->lang('ACP_EXTLINKNEWWIN_TITLE');
 		add_form_key('martin/externallinkinnewwindow');
@@ -27,14 +27,15 @@ class main_module
 		{
 			if (!check_form_key('martin/externallinkinnewwindow'))
 			{
+				$user->add_lang('acp/common');
 				trigger_error('FORM_INVALID');
 			}
 
-			$config->set('martin_extlinknewwin_enable_ucp', $request->variable('martin_extlinknewwin_enable_ucp', 0));
-			$config->set('martin_extlinknewwin_enable_user', $request->variable('martin_extlinknewwin_enable_user', 0));
-			$config->set('martin_extlinknewwin_enable_guests', $request->variable('martin_extlinknewwin_enable_guests', 0));
-			$config->set('martin_extlinknewwin_enable_bots', $request->variable('martin_extlinknewwin_enable_bots', 0));
-			$config->set('martin_extlinknewwin_add_ref', $request->variable('martin_extlinknewwin_add_ref', 0));
+			$config->set('martin_extlinknewwin_enable_ucp',		$request->variable('martin_extlinknewwin_enable_ucp', 0));
+			$config->set('martin_extlinknewwin_enable_user',	$request->variable('martin_extlinknewwin_enable_user', 0));
+			$config->set('martin_extlinknewwin_enable_guests',	$request->variable('martin_extlinknewwin_enable_guests', 0));
+			$config->set('martin_extlinknewwin_enable_bots',	$request->variable('martin_extlinknewwin_enable_bots', 0));
+			$config->set('martin_extlinknewwin_add_ref',		$request->variable('martin_extlinknewwin_add_ref', 0));
 
 			trigger_error($user->lang('ACP_EXTLINKNEWWIN_SETTINGS_SAVED') . adm_back_link($this->u_action));
 		}

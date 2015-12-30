@@ -12,6 +12,10 @@ namespace martin\externallinkinnewwindow\event;
 /**
 * @ignore
 */
+use \phpbb\config\config;
+use \phpbb\user;
+use \phpbb\request\request;
+use \phpbb\template\template;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -27,27 +31,27 @@ class ucp implements EventSubscriberInterface
 		);
 	}
 
-	/* @var \phpbb\config\config */
+	/* @var config */
 	protected $config;
 
-	/* @var \phpbb\user */
+	/* @var user */
 	protected $user;
 
-	/* @var \phpbb\request\request */
+	/* @var request */
 	protected $request;
 
-	/* @var \phpbb\template\template */
+	/* @var template */
 	protected $template;
 
 	/**
 	* Constructor
 	*
-	* @param \phpbb\config\config		$config
-	* @param \phpbb\user				$user
-	* @param \phpbb\request\request		$request
-	* @param \phpbb\template\template	$template
+	* @param config		$config
+	* @param user		$user
+	* @param request	$request
+	* @param template	$template
 	*/
-	public function __construct(\phpbb\config\config $config, \phpbb\user $user, \phpbb\request\request $request, \phpbb\template\template $template)
+	public function __construct(config $config, user $user, request $request, template $template)
 	{
 		$this->config = $config;
 		$this->user = $user;
@@ -86,21 +90,14 @@ class ucp implements EventSubscriberInterface
 				$this->template->assign_vars(array(
 					'S_UCP_EXTLINKNEWWIN' => true,
 				));
-				$this->template->assign_block_vars('martin_extlinknewwin_options', array(
-					'L_TITLE'	=> $this->user->lang('UCP_EXTLINKNEWWIN_OPTION_' . EXTLINKNEWWIN_USE_BOARD_DEFAULT),
-					'OPTION'	=> EXTLINKNEWWIN_USE_BOARD_DEFAULT,
-					'SELECTED'	=> $event['data']['martin_extlinknewwin_ucp'] == EXTLINKNEWWIN_USE_BOARD_DEFAULT,
-				));
-				$this->template->assign_block_vars('martin_extlinknewwin_options', array(
-					'L_TITLE'	=> $this->user->lang('UCP_EXTLINKNEWWIN_OPTION_' . EXTLINKNEWWIN_ALWAYS_NEW_WIN),
-					'OPTION'	=> EXTLINKNEWWIN_ALWAYS_NEW_WIN,
-					'SELECTED'	=> $event['data']['martin_extlinknewwin_ucp'] == EXTLINKNEWWIN_ALWAYS_NEW_WIN,
-				));
-				$this->template->assign_block_vars('martin_extlinknewwin_options', array(
-					'L_TITLE'	=> $this->user->lang('UCP_EXTLINKNEWWIN_OPTION_' . EXTLINKNEWWIN_NEVER_NEW_WIN),
-					'OPTION'	=> EXTLINKNEWWIN_NEVER_NEW_WIN,
-					'SELECTED'	=> $event['data']['martin_extlinknewwin_ucp'] == EXTLINKNEWWIN_NEVER_NEW_WIN,
-				));
+				foreach (array(EXTLINKNEWWIN_USE_BOARD_DEFAULT, EXTLINKNEWWIN_ALWAYS_NEW_WIN, EXTLINKNEWWIN_NEVER_NEW_WIN) as $value)
+				{
+					$this->template->assign_block_vars('martin_extlinknewwin_options', array(
+						'L_TITLE'	=> $this->user->lang('UCP_EXTLINKNEWWIN_OPTION_' . $value),
+						'OPTION'	=> $value,
+						'SELECTED'	=> $event['data']['martin_extlinknewwin_ucp'] == $value,
+					));
+				}
 			}
 		}
 	}
