@@ -4,7 +4,7 @@
 	"description": "Modifies external links to open in a new browser window by default.",
 	"homepage": "https://github.com/Mar-tin-G/ExternalLinkInNewWindow",
 	"version": "1.0.0-beta2",
-	"time": "2015-12-30",
+	"time": "2016-01-15",
 	"license": "GPL-2.0",
 	"authors": [{
 		"name": "Martin",
