@@ -2,14 +2,16 @@
 /**
 *
 * @package phpBB Extension - martin externallinkinnewwindow
-* @copyright (c) 2015 Martin ( https://github.com/Mar-tin-G )
+* @copyright (c) 2016 Martin ( https://github.com/Mar-tin-G )
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
 
 namespace martin\externallinkinnewwindow\migrations;
 
-class release_1_0_0 extends \phpbb\db\migration\migration
+use phpbb\db\migration\migration;
+
+class release_1_0_0 extends migration
 {
 	public function effectively_installed()
 	{
