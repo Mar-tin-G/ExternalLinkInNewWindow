@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Mar-tin-G/ExternalLinkInNewWindow.svg?branch=master)](https://travis-ci.org/Mar-tin-G/ExternalLinkInNewWindow)
+
 # External Link In New Window
 
 [phpBB 3.1](https://www.phpbb.com/) Extension External Link In New Window
@@ -27,6 +29,10 @@ The extension only modifies these links when displaying a message (post, private
 ### v1.0.0-beta1
 
 Initial release.
+
+### v1.0.0-beta2
+
+Code refactoring, unit tests - no functional changes.
 
 ## Installation Instructions
 

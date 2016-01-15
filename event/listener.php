@@ -127,7 +127,7 @@ class listener implements EventSubscriberInterface
 						// the attribute may be one of:
 						'(?:'.
 							// class: we need to match this
-							'class="'. $class .'"'.
+							'class="(?P<class>'. $class .')"'.
 							'|'.
 							// href: we need to match this too
 							'href="(?P<href>[^"]+?)"'.
@@ -146,6 +146,12 @@ class listener implements EventSubscriberInterface
 			{
 				foreach ($matches as $match)
 				{
+					// do nothing if the postlink class or the href was not set
+					if ($match['class'] == '' || $match['href'] == '')
+					{
+						continue;
+					}
+
 					// if you put an internal link in [url] tags, phpBB will mark them as "postlink",
 					// i.e. as an external link. So we have to filter out these internal links.
 					if (strpos($match['href'], $board_url) === false)
