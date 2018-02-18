@@ -2,7 +2,7 @@
 
 # External Link In New Window
 
-[phpBB 3.1](https://www.phpbb.com/) Extension External Link In New Window
+[phpBB 3.2](https://www.phpbb.com/) Extension External Link In New Window
 
 ## Beta
 
@@ -24,16 +24,6 @@ If enabled in the Admin Control Panel, the board users can configure in their Us
 
 The extension only modifies these links when displaying a message (post, private message, etc.). It does not alter the messages that are stored into the database.
 
-## Changelog
-
-### v1.0.0-beta1
-
-Initial release.
-
-### v1.0.0-beta2
-
-Code refactoring, unit tests - no functional changes.
-
 ## Installation Instructions
 
 * Download ZIP file from master branch
@@ -47,7 +37,7 @@ Code refactoring, unit tests - no functional changes.
 
 ## Feedback
 
-Please feel free to post any feedback to the [External Link In New Window topic](https://www.phpbb.com/community/viewtopic.php?f=456&t=2284971) in phpBB's extension community forum.
+Please feel free to post any feedback to the [External Link In New Window topic](https://www.phpbb.com/community/viewtopic.php?f=501&t=2284971) in phpBB's extension community forum.
 
 ## License
 

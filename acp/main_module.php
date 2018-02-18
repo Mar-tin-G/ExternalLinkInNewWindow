@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - martin externallinkinnewwindow
-* @copyright (c) 2016 Martin ( https://github.com/Mar-tin-G )
+* @copyright (c) 2018 Martin ( https://github.com/Mar-tin-G )
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -28,7 +28,7 @@ class main_module
 			if (!check_form_key('martin/externallinkinnewwindow'))
 			{
 				$user->add_lang('acp/common');
-				trigger_error('FORM_INVALID');
+				trigger_error('FORM_INVALID', E_USER_WARNING);
 			}
 
 			$config->set('martin_extlinknewwin_enable_ucp',		$request->variable('martin_extlinknewwin_enable_ucp', 0));
