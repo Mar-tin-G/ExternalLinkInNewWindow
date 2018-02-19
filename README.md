@@ -1,12 +1,8 @@
+# phpBB External Link In New Window extension
+
+This is the repository for the development of the [phpBB 3.2](https://www.phpbb.com/) "External Link In New Window" Extension.
+
 [![Build Status](https://travis-ci.org/Mar-tin-G/ExternalLinkInNewWindow.svg?branch=master)](https://travis-ci.org/Mar-tin-G/ExternalLinkInNewWindow)
-
-# External Link In New Window
-
-[phpBB 3.2](https://www.phpbb.com/) Extension External Link In New Window
-
-## Beta
-
-This extension is still in beta status. Please do not use this extension on production boards without testing.
 
 ## Description
 
@@ -24,20 +20,28 @@ If enabled in the Admin Control Panel, the board users can configure in their Us
 
 The extension only modifies these links when displaying a message (post, private message, etc.). It does not alter the messages that are stored into the database.
 
-## Installation Instructions
+## Installation
 
-* Download ZIP file from master branch
-* Extract the ZIP file locally
-* Create the following folders in you phpBB root path (if they do not exist already): `ext/martin/externallinkinnewwindow/`
-* Upload all files from the extracted ZIP file to this folder `ext/martin/externallinkinnewwindow/` (overwrite any existing files)
-* Log into your forum and enter the *Administration Control Panel*
-* Go to *Customise* > *Extension Management* > *Manage Extensions*
-* Find *External Link In New Window* in the list on the right side and click on *Enable*
-* Go to *Extensions* > *External Link In New Window* > *Settings* to set up the extension
+* Download the latest validated release.
+* Extract the downloaded release and copy it to the `ext` directory of your phpBB board
+  * this should result in a `ext/martin/externallinkinnewwindow/` directory
+* Log into your forum and enter the *Administration Control Panel*.
+* Go to *Customise* > *Extension Management* > *Manage Extensions*.
+* Find *External Link In New Window* in the list on the right side and click on *Enable*.
+* Go to *Extensions* > *External Link In New Window* > *Settings* to set up the extension.
+
+## Removal
+
+* Log into your forum and enter the *Administration Control Panel*.
+* Go to *Customise* > *Extension Management* > *Manage Extensions*.
+* Find *External Link In New Window* in the list on the right side and click on *Disable*.
+* To permanently uninstall, click on *Delete data* and delete the `ext/martin/externallinkinnewwindow/` directory afterwards.
 
 ## Feedback
 
-Please feel free to post any feedback to the [External Link In New Window topic](https://www.phpbb.com/community/viewtopic.php?f=501&t=2284971) in phpBB's extension community forum.
+Please feel free to post any feedback to the [External Link In New Window topic](https://www.phpbb.com/community/viewtopic.php?t=2284971) in phpBB's extension community forum.
+
+For bug reports, please open an issue on [the extension's GitHub page](https://github.com/Mar-tin-G/ExternalLinkInNewWindow).
 
 ## License
 

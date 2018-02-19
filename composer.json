@@ -3,8 +3,8 @@
 	"type": "phpbb-extension",
 	"description": "Modifies external links to open in a new browser window by default.",
 	"homepage": "https://github.com/Mar-tin-G/ExternalLinkInNewWindow",
-	"version": "1.0.0-beta3",
-	"time": "2018-02-18",
+	"version": "1.0.0",
+	"time": "2018-02-19",
 	"license": "GPL-2.0",
 	"authors": [
 		{

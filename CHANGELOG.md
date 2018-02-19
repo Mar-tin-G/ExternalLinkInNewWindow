@@ -2,7 +2,7 @@
 
 ## Version 1.x (for phpBB 3.2)
 
-### v1.0.0-beta3 - 2018-02-18
+### v1.0.0 - 2018-02-19
 
 Upgrade to phpBB 3.2 extension.
 
