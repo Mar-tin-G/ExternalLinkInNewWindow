@@ -16,7 +16,7 @@ class ucp_test extends \phpbb_test_case
 	/** @var \martin\externallinkinnewwindow\event\ucp */
 	protected $listener;
 
-	protected $config, $user, $request, $template;
+	protected $config, $user, $request, $template, $lang;
 
 	/**
 	* Define the extensions to be tested
@@ -50,6 +50,10 @@ class ucp_test extends \phpbb_test_case
 		$this->template = $this->getMockBuilder('\phpbb\template\template')
 			->disableOriginalConstructor()
 			->getMock();
+
+		$this->lang = $this->getMockBuilder('\phpbb\language\language')
+			->disableOriginalConstructor()
+			->getMock();
 	}
 
 	/**
@@ -61,7 +65,8 @@ class ucp_test extends \phpbb_test_case
 			$this->config,
 			$this->user,
 			$this->request,
-			$this->template
+			$this->template,
+			$this->lang
 		);
 	}
 
@@ -149,9 +154,9 @@ class ucp_test extends \phpbb_test_case
 			->with($this->equalTo('martin_extlinknewwin_ucp'), $this->equalTo($database))
 			->willReturn($request !== null ? $request : $database);
 
-		$this->user->expects($this->once())
-			->method('add_lang_ext')
-			->with($this->equalTo('martin/externallinkinnewwindow'), $this->equalTo('ucp'));
+		$this->lang->expects($this->once())
+			->method('add_lang')
+			->with($this->equalTo('ucp'), $this->equalTo('martin/externallinkinnewwindow'));
 
 		$this->template->expects($this->once())
 			->method('assign_vars')

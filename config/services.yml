@@ -13,5 +13,6 @@ services:
       - @user
       - @request
       - @template
+      - @language
     tags:
       - { name: event.listener }
