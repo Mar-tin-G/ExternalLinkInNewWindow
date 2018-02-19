@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - martin externallinkinnewwindow
-* @copyright (c) 2016 Martin ( https://github.com/Mar-tin-G )
+* @copyright (c) 2018 Martin ( https://github.com/Mar-tin-G )
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -17,18 +17,21 @@ class main_module
 
 	public function main($id, $mode)
 	{
-		global $user, $template, $request, $config;
+		global $phpbb_container, $template, $request, $config;
+
+		/* @var \phpbb\language\language $lang */
+		$lang = $phpbb_container->get('language');
 
 		$this->tpl_name = 'externallinkinnewwindow_body';
-		$this->page_title = $user->lang('ACP_EXTLINKNEWWIN_TITLE');
+		$this->page_title = $lang->lang('ACP_EXTLINKNEWWIN_TITLE');
 		add_form_key('martin/externallinkinnewwindow');
 
 		if ($request->is_set_post('submit'))
 		{
 			if (!check_form_key('martin/externallinkinnewwindow'))
 			{
-				$user->add_lang('acp/common');
-				trigger_error('FORM_INVALID');
+				$lang->add_lang('acp/common');
+				trigger_error('FORM_INVALID', E_USER_WARNING);
 			}
 
 			$config->set('martin_extlinknewwin_enable_ucp',		$request->variable('martin_extlinknewwin_enable_ucp', 0));
@@ -37,7 +40,7 @@ class main_module
 			$config->set('martin_extlinknewwin_enable_bots',	$request->variable('martin_extlinknewwin_enable_bots', 0));
 			$config->set('martin_extlinknewwin_add_ref',		$request->variable('martin_extlinknewwin_add_ref', 0));
 
-			trigger_error($user->lang('ACP_EXTLINKNEWWIN_SETTINGS_SAVED') . adm_back_link($this->u_action));
+			trigger_error($lang->lang('ACP_EXTLINKNEWWIN_SETTINGS_SAVED') . adm_back_link($this->u_action));
 		}
 
 		$template->assign_vars(array(

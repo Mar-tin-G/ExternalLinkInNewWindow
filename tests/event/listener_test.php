@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - martin externallinkinnewwindow
-* @copyright (c) 2016 Martin ( https://github.com/Mar-tin-G )
+* @copyright (c) 2018 Martin ( https://github.com/Mar-tin-G )
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -33,13 +33,8 @@ class listener_test extends \phpbb_test_case
 	*/
 	public function setUp()
 	{
-		global $user, $request;
-
 		parent::setUp();
-
-		// needed for generate_board_url() call.
-		$request = new \phpbb_mock_request();
-		$user = new \phpbb_mock_user();
+		$this->set_global_mocks();
 
 		$this->config = new \phpbb\config\config(array(
 			'martin_extlinknewwin_add_ref'			=> 1,
@@ -48,6 +43,26 @@ class listener_test extends \phpbb_test_case
 		$this->user = $this->getMockBuilder('\phpbb\user')
 			->disableOriginalConstructor()
 			->getMock();
+	}
+
+	/**
+	* Setup mocks needed for generate_board_url() call
+	*/
+	protected function set_global_mocks()
+	{
+		global $user, $request, $config;
+
+		$request = new \phpbb_mock_request();
+		$user = new \phpbb_mock_user();
+
+		$config = array(
+			'force_server_vars' => true,
+			'server_protocol' => 'http://',
+			'server_name' => 'my-forum.com',
+			'server_port' => 80,
+			'script_path' => '/',
+			'cookie_secure' => false,
+		);
 	}
 
 	/**
@@ -227,7 +242,9 @@ class listener_test extends \phpbb_test_case
 				false,
 			),
 		);
-	}	/**
+	}
+
+	/**
 	* Test the logic in modify_external_links
 	*
 	* @dataProvider modify_external_links_logic_data
@@ -266,13 +283,7 @@ class listener_test extends \phpbb_test_case
 	*/
 	public function modify_external_links_data()
 	{
-		global $user, $request;
-
-		parent::setUp();
-
-		// needed for generate_board_url() call.
-		$request = new \phpbb_mock_request();
-		$user = new \phpbb_mock_user();
+		$this->set_global_mocks();
 
 		$board_url = generate_board_url();
 
