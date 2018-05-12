@@ -17,6 +17,7 @@ use \phpbb\user;
 use \phpbb\request\request;
 use \phpbb\template\template;
 use \phpbb\language\language;
+use martin\externallinkinnewwindow\constants;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -96,7 +97,7 @@ class ucp implements EventSubscriberInterface
 				$this->template->assign_vars(array(
 					'S_UCP_EXTLINKNEWWIN' => true,
 				));
-				foreach (array(EXTLINKNEWWIN_USE_BOARD_DEFAULT, EXTLINKNEWWIN_ALWAYS_NEW_WIN, EXTLINKNEWWIN_NEVER_NEW_WIN) as $value)
+				foreach (array(constants::USE_BOARD_DEFAULT, constants::ALWAYS_NEW_WIN, constants::NEVER_NEW_WIN) as $value)
 				{
 					$this->template->assign_block_vars('martin_extlinknewwin_options', array(
 						'L_TITLE'	=> $this->lang->lang('UCP_EXTLINKNEWWIN_OPTION_' . $value),

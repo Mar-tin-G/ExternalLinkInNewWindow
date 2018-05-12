@@ -16,7 +16,7 @@ class main_info
 		return array(
 			'filename'	=> '\martin\externallinkinnewwindow\acp\main_module',
 			'title'		=> 'ACP_EXTLINKNEWWIN_TITLE',
-			'version'	=> '1.0.0',
+			'version'	=> '1.0.1',
 			'modes'		=> array(
 				'settings'	=> array(
 					'title'	=> 'ACP_EXTLINKNEWWIN_SETTINGS',
