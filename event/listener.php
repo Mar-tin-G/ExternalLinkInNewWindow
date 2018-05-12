@@ -14,6 +14,7 @@ namespace martin\externallinkinnewwindow\event;
 */
 use \phpbb\config\config;
 use \phpbb\user;
+use martin\externallinkinnewwindow\constants;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -24,8 +25,8 @@ class listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
-			'core.user_setup'						=> 'define_constants',
-			'core.modify_text_for_display_after'	=> 'modify_external_links',
+			'core.text_formatter_s9e_configure_after'	=> 'configure_textformatter',
+			'core.text_formatter_s9e_renderer_setup'	=> 'set_textformatter_parameters',
 		);
 	}
 
@@ -48,40 +49,62 @@ class listener implements EventSubscriberInterface
 	}
 
 	/**
-	* Define some constants that are needed for this extension. This function is called
-	* early on every page by using the event 'core.user_setup'.
+	* Extends the s9e TextFormatter template for the URL tag to include two more
+	* templates: open the URL in a new window, and open it in a new window with
+	* setting the rel="nofollow" attribute.
 	*
 	* @param	object		$event	The event object
 	* @return	null
 	* @access	public
 	*/
-	public function define_constants($event)
+	public function configure_textformatter($event)
 	{
-		define('EXTLINKNEWWIN_USE_BOARD_DEFAULT', 0);
-		define('EXTLINKNEWWIN_ALWAYS_NEW_WIN', 1);
-		define('EXTLINKNEWWIN_NEVER_NEW_WIN', 2);
+		/** @var \s9e\TextFormatter\Configurator $configurator */
+		$configurator = $event['configurator'];
+
+		// the default URL tag template is this:
+		// <a href="{@url}" class="postlink"><xsl:apply-templates/></a>
+		$default_url_template = $configurator->tags['URL']->template;
+
+		$url_template_new_window = str_replace(
+			'href="{@url}"',
+			'href="{@url}" target="_blank"',
+			$default_url_template
+		);
+		$url_template_new_window_nofollow = str_replace(
+			'href="{@url}"',
+			'href="{@url}" target="_blank" rel="nofollow"',
+			$default_url_template
+		);
+
+		// select the appropriate template based on the parameters and the URL
+		$configurator->tags['URL']->template =
+			'<xsl:choose>' .
+				'<xsl:when test="($S_OPEN_IN_NEW_WINDOW) and (not(starts-with(@url, \'' . generate_board_url() . '\')))">' .
+					'<xsl:choose>' .
+						'<xsl:when test="$S_NOFOLLOW">' . $url_template_new_window_nofollow . '</xsl:when>' .
+						'<xsl:otherwise>' . $url_template_new_window . '</xsl:otherwise>' .
+					'</xsl:choose>' .
+				'</xsl:when>' .
+				'<xsl:otherwise>' . $default_url_template . '</xsl:otherwise>' .
+			'</xsl:choose>';
 	}
 
 	/**
-	* Add the 'target="_blank"' attribute to HTML anchors
-	*
-	* Only links to external resources are modified.
-	* If enabled in ACP, this function also adds the 'rel="nofollow"' attribute.
-	* NB: only the output to the visitors user agent is altered, the data in the
-	* database is unchanged.
+	* Sets parameters for the s9e TextFormatter, which will be used to select
+	* the appropriate template for the URL tag.
 	*
 	* @param	object		$event	The event object
 	* @return	null
 	* @access	public
 	*/
-	public function modify_external_links($event)
+	public function set_textformatter_parameters($event)
 	{
-		$text = $event['text'];
-		$board_url = generate_board_url();
-		$matches = array();
+		/** @var \s9e\TextFormatter\Renderer $renderer */
+		$renderer = $event['renderer']->get_renderer();
 
 		// only modify external links to open in a new window if...
-		if (
+		$renderer->setParameter('S_OPEN_IN_NEW_WINDOW',
 			// ... the visitor is a guest and the ACP option "Open external links in new window for guests" is set...
 			(!$this->user->data['is_registered'] && $this->config['martin_extlinknewwin_enable_guests'])
 			// ... or the visitor is a bot and the ACP option "Open external links in new window for bots" is set...
@@ -94,99 +117,14 @@ class listener implements EventSubscriberInterface
 				// ... or the ACP option to let the user enable/disable this feature via UCP IS set, ...
 				|| ($this->config['martin_extlinknewwin_enable_ucp'] && (
 					// ... and the user chose to enable this feature...
-					($this->user->data['user_extlinknewwin'] == EXTLINKNEWWIN_ALWAYS_NEW_WIN)
+					($this->user->data['user_extlinknewwin'] == constants::ALWAYS_NEW_WIN)
 					// ... or he chose to use the board default, which is to enable this feature.
-					|| ($this->user->data['user_extlinknewwin'] == EXTLINKNEWWIN_USE_BOARD_DEFAULT && $this->config['martin_extlinknewwin_enable_user'])
+					|| ($this->user->data['user_extlinknewwin'] == constants::USE_BOARD_DEFAULT && $this->config['martin_extlinknewwin_enable_user'])
 				))
 			))
-		)
-		{
-			/*
-			 * search for all links with one expensive preg_match_all() call.
-			 * the regular expression matches:
-			 * <a ... class="... postlink ..." ... href="{HREF}" ...>{TEXT}</a>
-			 *
-			 * the $matches array then contains for each single match:
-			 * [0]        the full match
-			 * ['anchor'] the full opening anchor tag '<a ... ' (without the closing >) of the matched link
-			 * ['href']   the external link HREF
-			 * ['text']   the TEXT content of the <a> element
-			 */
+		);
 
-			// construct the regular expression:
-			// all characters that are not separators (i.e. that do not end attribute or element)
-			$not_sep = '[^"<>]*?';
-			// the class attribute must contain 'postlink', but there may be other classes appended or prepended
-			$class = $not_sep . 'postlink'. $not_sep;
-
-			if (preg_match_all('#'.
-				// we need the full opening anchor tag <a ... >
-				'(?P<anchor><a'.
-					// the attributes are in arbitrary order, separated by whitespace
-					'(?:\s+'.
-						// the attribute may be one of:
-						'(?:'.
-							// class: we need to match this
-							'class="(?P<class>'. $class .')"'.
-							'|'.
-							// href: we need to match this too
-							'href="(?P<href>[^"]+?)"'.
-							'|'.
-							// other attributes are not of interest to us
-							'\w+="'. $not_sep . '"'.
-						')'.
-					')+'.
-				')>'.
-				// we also need the link text <a ...>text</a>
-				// NB: do not use $not_sep here as the text may contain the " character
-				'(?P<text>[^<]+?)'.
-				'</a>#si',
-				$text, $matches, PREG_SET_ORDER)
-			)
-			{
-				foreach ($matches as $match)
-				{
-					// do nothing if the postlink class or the href was not set
-					if ($match['class'] == '' || $match['href'] == '')
-					{
-						continue;
-					}
-
-					// if you put an internal link in [url] tags, phpBB will mark them as "postlink",
-					// i.e. as an external link. So we have to filter out these internal links.
-					if (strpos($match['href'], $board_url) === false)
-					{
-						// if the link already contains the 'target' attribute, replace it; otherwise append it
-						if (preg_match('#target="[^"]+?"#si', $match['anchor']) === 1)
-						{
-							$link_anchor = preg_replace('#target="[^"]+?"#si', 'target="_blank"', $match['anchor']);
-						}
-						else
-						{
-							$link_anchor = $match['anchor'] . ' target="_blank"';
-						}
-
-						// add the rel="nofollow" attribute, if enabled in ACP
-						if ($this->config['martin_extlinknewwin_add_ref'])
-						{
-							// replace existing 'rel' attribute or append it
-							if (preg_match('#rel="[^"]+?"#si', $link_anchor) === 1)
-							{
-								$link_anchor = preg_replace('#rel="[^"]+?"#si', 'rel="nofollow"', $link_anchor);
-							}
-							else
-							{
-								$link_anchor .= ' rel="nofollow"';
-							}
-						}
-
-						// finally replace the external link
-						$text = str_replace($match[0], $link_anchor . '>' . $match['text'] . '</a>', $text);
-					}
-				}
-
-				$event['text'] = $text;
-			}
-		}
+		// add rel="nofollow" attribute if enabled in the ACP
+		$renderer->setParameter('S_NOFOLLOW', $this->config['martin_extlinknewwin_add_ref']);
 	}
 }

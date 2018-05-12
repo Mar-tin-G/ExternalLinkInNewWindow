@@ -37,7 +37,7 @@ class listener_test extends \phpbb_test_case
 		$this->set_global_mocks();
 
 		$this->config = new \phpbb\config\config(array(
-			'martin_extlinknewwin_add_ref'			=> 1,
+			'martin_extlinknewwin_add_ref'	=> 1,
 		));
 
 		$this->user = $this->getMockBuilder('\phpbb\user')
@@ -55,14 +55,14 @@ class listener_test extends \phpbb_test_case
 		$request = new \phpbb_mock_request();
 		$user = new \phpbb_mock_user();
 
-		$config = array(
+		$config = new \phpbb\config\config(array(
 			'force_server_vars' => true,
 			'server_protocol' => 'http://',
 			'server_name' => 'my-forum.com',
 			'server_port' => 80,
 			'script_path' => '/',
 			'cookie_secure' => false,
-		);
+		));
 	}
 
 	/**
@@ -91,34 +91,17 @@ class listener_test extends \phpbb_test_case
 	public function test_getSubscribedEvents()
 	{
 		$this->assertEquals(array(
-			'core.user_setup',
-			'core.modify_text_for_display_after',
+			'core.text_formatter_s9e_configure_after',
+			'core.text_formatter_s9e_renderer_setup',
 		), array_keys(\martin\externallinkinnewwindow\event\listener::getSubscribedEvents()));
 	}
 
 	/**
-	* Test the core.user_setup event
-	*/
-	public function test_define_constants()
-	{
-		$this->set_listener();
-
-		$dispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
-		$dispatcher->addListener('core.user_setup', array($this->listener, 'define_constants'));
-
-		$dispatcher->dispatch('core.user_setup');
-
-		$this->assertEquals(0, EXTLINKNEWWIN_USE_BOARD_DEFAULT);
-		$this->assertEquals(1, EXTLINKNEWWIN_ALWAYS_NEW_WIN);
-		$this->assertEquals(2, EXTLINKNEWWIN_NEVER_NEW_WIN);
-	}
-
-	/**
-	* Data set for test_modify_external_links_logic
+	* Data set for test_set_textformatter_parameters
 	*
 	* @return array Array of test data
 	*/
-	public function modify_external_links_logic_data()
+	public function set_textformatter_parameters_data()
 	{
 		return array(
 			'guest with config enabled' => array(
@@ -245,16 +228,22 @@ class listener_test extends \phpbb_test_case
 	}
 
 	/**
-	* Test the logic in modify_external_links
+	* Test the user status/UCP logic in set_textformatter_parameters
 	*
-	* @dataProvider modify_external_links_logic_data
+	* @dataProvider set_textformatter_parameters_data
 	*/
-	public function test_modify_external_links_logic($vars, $modified)
+	public function test_set_textformatter_parameters($vars, $expected)
 	{
 		$this->set_listener();
 
-		$text 			= '<a what="ever" class="foo postlink bar" foo="bar" href="http://example.com/" bar="foo">text</a>';
-		$modified_text	= '<a what="ever" class="foo postlink bar" foo="bar" href="http://example.com/" bar="foo" target="_blank" rel="nofollow">text</a>';
+		$renderer = $this->getMockBuilder('stdClass')
+			->disableOriginalConstructor()
+			->setMethods(array('get_renderer'))
+			->getMock();
+
+		$renderer
+			->method('get_renderer')
+			->willReturn(new MockRenderer());
 
 		$this->user->data['is_registered']		= $vars['registered'];
 		$this->user->data['is_bot']				= $vars['bot'];
@@ -265,23 +254,70 @@ class listener_test extends \phpbb_test_case
 		$this->config['martin_extlinknewwin_enable_user']	= $vars['conf_user'];
 
 		$dispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
-		$dispatcher->addListener('core.modify_text_for_display_after', array($this->listener, 'modify_external_links'));
+		$dispatcher->addListener('core.text_formatter_s9e_renderer_setup', array($this->listener, 'set_textformatter_parameters'));
 
-		$event_data = array('text');
+		$event_data = array('renderer');
 		$event = new \phpbb\event\data(compact($event_data));
-		$dispatcher->dispatch('core.modify_text_for_display_after', $event);
+		$dispatcher->dispatch('core.text_formatter_s9e_renderer_setup', $event);
 
-		$event_data_after = $event->get_data_filtered($event_data);
-		$this->assertArrayHasKey('text', $event_data_after);
-		$this->assertEquals(($modified ? $modified_text : $text), $event_data_after['text']);
+		$this->assertEquals($renderer->get_renderer()->getParameter('S_OPEN_IN_NEW_WINDOW'), $expected);
 	}
 
 	/**
-	* Data set for test_modify_external_links
+	* Data set for test_set_textformatter_parameters_acp
 	*
 	* @return array Array of test data
 	*/
-	public function modify_external_links_data()
+	public function set_textformatter_parameters_data_acp()
+	{
+		return array(
+			'acp config rel="nofollow" enabled' => array(
+				true,
+				true,
+			),
+			'acp config rel="nofollow" disabled' => array(
+				false,
+				false,
+			),
+		);
+	}
+
+	/**
+	* Test the ACP logic in set_textformatter_parameters
+	*
+	* @dataProvider set_textformatter_parameters_data_acp
+	*/
+	public function test_set_textformatter_parameters_acp($acp_config, $expected)
+	{
+		$this->set_listener();
+
+		$renderer = $this->getMockBuilder('stdClass')
+			->disableOriginalConstructor()
+			->setMethods(array('get_renderer'))
+			->getMock();
+
+		$renderer
+			->method('get_renderer')
+			->willReturn(new MockRenderer());
+
+		$this->config['martin_extlinknewwin_add_ref'] = $acp_config;
+
+		$dispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
+		$dispatcher->addListener('core.text_formatter_s9e_renderer_setup', array($this->listener, 'set_textformatter_parameters'));
+
+		$event_data = array('renderer');
+		$event = new \phpbb\event\data(compact($event_data));
+		$dispatcher->dispatch('core.text_formatter_s9e_renderer_setup', $event);
+
+		$this->assertEquals($renderer->get_renderer()->getParameter('S_NOFOLLOW'), $expected);
+	}
+
+	/**
+	* Data set for test_text_rendering
+	*
+	* @return array Array of test data
+	*/
+	public function text_rendering_data()
 	{
 		$this->set_global_mocks();
 
@@ -289,65 +325,112 @@ class listener_test extends \phpbb_test_case
 
 		return array(
 			'local link' => array(
-				'<a what="ever" class="foo postlink-local bar" foo="bar" href="'. $board_url .'" bar="foo">text</a>',
-				'<a what="ever" class="foo postlink-local bar" foo="bar" href="'. $board_url .'" bar="foo">text</a>',
+				'<r><URL url="'. $board_url .'">text</URL></r>',
+				array(
+					'S_OPEN_IN_NEW_WINDOW'	=> true,
+					'S_NOFOLLOW'			=> true,
+				),
+				'<a href="'. $board_url .'" class="postlink">text</a>',
 			),
-			'local link too' => array(
-				'<a what="ever" class="foo postlink bar" foo="bar" href="'. $board_url .'" bar="foo">text</a>',
-				'<a what="ever" class="foo postlink bar" foo="bar" href="'. $board_url .'" bar="foo">text</a>',
+			'local link with link text' => array(
+				'<r><URL url="'. $board_url .'/viewforum.php?f=1"><LINK_TEXT text="viewforum.php?f=1">'. $board_url .'/viewforum.php?f=1</LINK_TEXT></URL></r>',
+				array(
+					'S_OPEN_IN_NEW_WINDOW'	=> true,
+					'S_NOFOLLOW'			=> true,
+				),
+				'<a href="'. $board_url .'/viewforum.php?f=1" class="postlink">viewforum.php?f=1</a>',
 			),
-			'no postlink class' => array(
-				'<a what="ever" class="foo bar" foo="bar" href="http://example.com/" bar="foo">text</a>',
-				'<a what="ever" class="foo bar" foo="bar" href="http://example.com/" bar="foo">text</a>',
+			'local link with url bbcode' => array(
+				'<r><URL url="'. $board_url .'/viewforum.php?f=1"><s>[url='. $board_url .'/viewforum.php?f=1]</s>text<e>[/url]</e></URL></r>',
+				array(
+					'S_OPEN_IN_NEW_WINDOW'	=> true,
+					'S_NOFOLLOW'			=> true,
+				),
+				'<a href="'. $board_url .'/viewforum.php?f=1" class="postlink">text</a>',
 			),
-			'no href' => array(
-				'<a what="ever" class="foo postlink bar" foo="bar" bar="foo">text</a>',
-				'<a what="ever" class="foo postlink bar" foo="bar" bar="foo">text</a>',
+			'external link, but shall not be replaced' => array(
+				'<r><URL url="http://example.com/"></URL></r>',
+				array(
+					'S_OPEN_IN_NEW_WINDOW'	=> false,
+					'S_NOFOLLOW'			=> true,
+				),
+				'<a href="http://example.com/" class="postlink"></a>',
 			),
-			'no link text' => array(
-				'<a what="ever" class="foo postlink bar" foo="bar" href="http://example.com/" bar="foo"></a>',
-				'<a what="ever" class="foo postlink bar" foo="bar" href="http://example.com/" bar="foo"></a>',
+			'external link, without target attribute' => array(
+				'<r><URL url="http://example.com/"></URL></r>',
+				array(
+					'S_OPEN_IN_NEW_WINDOW'	=> true,
+					'S_NOFOLLOW'			=> true,
+				),
+				'<a href="http://example.com/" class="postlink" target="_blank" rel="nofollow"></a>',
 			),
-			'external link, contains target attribute ' => array(
-				'<a what="ever" class="foo postlink bar" foo="bar" href="http://example.com/" target="foobar" bar="foo">text</a>',
-				'<a what="ever" class="foo postlink bar" foo="bar" href="http://example.com/" target="_blank" bar="foo" rel="nofollow">text</a>',
+			'external link, but nofollow setting is false' => array(
+				'<r><URL url="http://example.com/"></URL></r>',
+				array(
+					'S_OPEN_IN_NEW_WINDOW'	=> true,
+					'S_NOFOLLOW'			=> false,
+				),
+				'<a href="http://example.com/" class="postlink" target="_blank"></a>',
 			),
-			'external link, without target attribute ' => array(
-				'<a what="ever" class="foo postlink bar" foo="bar" href="http://example.com/" bar="foo">text</a>',
-				'<a what="ever" class="foo postlink bar" foo="bar" href="http://example.com/" bar="foo" target="_blank" rel="nofollow">text</a>',
+			'external link, contains target attribute' => array(
+				'<r><URL url="http://example.com/" target="foobar"></URL></r>',
+				array(
+					'S_OPEN_IN_NEW_WINDOW'	=> true,
+					'S_NOFOLLOW'			=> true,
+				),
+				'<a href="http://example.com/" class="postlink" target="_blank" rel="nofollow"></a>',
 			),
-			'external link, contains rel attribute ' => array(
-				'<a what="ever" class="foo postlink bar" foo="bar" href="http://example.com/" rel="foobar" bar="foo">text</a>',
-				'<a what="ever" class="foo postlink bar" foo="bar" href="http://example.com/" rel="nofollow" bar="foo" target="_blank">text</a>',
-			),
-			'external link, without rel attribute ' => array(
-				'<a what="ever" class="foo postlink bar" foo="bar" href="http://example.com/" bar="foo">text</a>',
-				'<a what="ever" class="foo postlink bar" foo="bar" href="http://example.com/" bar="foo" target="_blank" rel="nofollow">text</a>',
+			'external link, contains rel attribute' => array(
+				'<r><URL url="http://example.com/" rel="foobar"></URL></r>',
+				array(
+					'S_OPEN_IN_NEW_WINDOW'	=> true,
+					'S_NOFOLLOW'			=> true,
+				),
+				'<a href="http://example.com/" class="postlink" target="_blank" rel="nofollow"></a>',
 			),
 		);
 	}
 
 	/**
-	* Test the core.modify_text_for_display_after event
+	* Test the s9e text rendering
 	*
-	* @dataProvider modify_external_links_data
+	* We do not test the configure_textformatter() method, as that method only
+	* modifies the template for the URL tag. Instead we use a test helper to
+	* actually render some URL tags with a template which comes from the
+	* fixtures, and check that external links are rendered correctly.
+	*
+	* @dataProvider text_rendering_data
 	*/
-	public function test_modify_external_links($text, $expected)
+	public function test_text_rendering($xml, $vars, $expected)
 	{
-		$this->set_listener();
+		$fixture = __DIR__ . '/fixtures/styles/';
+		$container = $this->get_test_case_helpers()->set_s9e_services(null, null, $fixture);
 
-		$this->user->data['is_registered'] = false;
-		$this->config['martin_extlinknewwin_enable_guests'] = true;
+		$renderer = $container->get('text_formatter.renderer');
 
-		$dispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
-		$dispatcher->addListener('core.modify_text_for_display_after', array($this->listener, 'modify_external_links'));
+		$r = $renderer->get_renderer();
+		$r->setParameter('S_OPEN_IN_NEW_WINDOW', $vars['S_OPEN_IN_NEW_WINDOW']);
+		$r->setParameter('S_NOFOLLOW', $vars['S_NOFOLLOW']);
 
-		$event_data = array('text');
-		$event = new \phpbb\event\data(compact($event_data));
-		$dispatcher->dispatch('core.modify_text_for_display_after', $event);
+		$this->assertEquals($expected, $renderer->render($xml));
+	}
+}
 
-		$event_data_after = $event->get_data_filtered($event_data);
-		$this->assertArrayHasKey('text', $event_data_after);
-		$this->assertEquals($expected, $event_data_after['text']);
+class MockRenderer {
+	protected $parameters;
+
+	public function __construct()
+	{
+		$this->parameters = array();
+	}
+
+	public function setParameter($name, $value)
+	{
+		$this->parameters[$name] = $value;
+	}
+
+	public function getParameter($name)
+	{
+		return $this->parameters[$name];
 	}
 }
