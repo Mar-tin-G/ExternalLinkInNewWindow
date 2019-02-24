@@ -70,7 +70,7 @@
 
 <!-- BEGIN url -->
 <xsl:choose>
-	<xsl:when test="($S_OPEN_IN_NEW_WINDOW) and (not(starts-with(@url, 'http://my-forum.com')))">
+	<xsl:when test="$S_OPEN_IN_NEW_WINDOW and not(starts-with(@url, 'http://my-forum.com'))">
 		<xsl:choose>
 			<xsl:when test="$S_NOFOLLOW"><a href="{URL}" class="postlink" target="_blank" rel="nofollow">{DESCRIPTION}</a></xsl:when>
 			<xsl:otherwise><a href="{URL}" class="postlink" target="_blank">{DESCRIPTION}</a></xsl:otherwise>
