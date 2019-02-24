@@ -80,7 +80,7 @@ class listener implements EventSubscriberInterface
 		// select the appropriate template based on the parameters and the URL
 		$configurator->tags['URL']->template =
 			'<xsl:choose>' .
-				'<xsl:when test="($S_OPEN_IN_NEW_WINDOW) and (not(starts-with(@url, \'' . generate_board_url() . '\')))">' .
+				'<xsl:when test="$S_OPEN_IN_NEW_WINDOW and not(starts-with(@url, \'' . generate_board_url() . '\'))">' .
 					'<xsl:choose>' .
 						'<xsl:when test="$S_NOFOLLOW">' . $url_template_new_window_nofollow . '</xsl:when>' .
 						'<xsl:otherwise>' . $url_template_new_window . '</xsl:otherwise>' .
