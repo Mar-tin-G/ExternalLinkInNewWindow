@@ -10,6 +10,8 @@ Modifies external links (i.e. links to a resource outside of your board) to open
 
 Works without JavaScript, the needed attributes are injected into the HTML output. Also adds the ability to add the *rel=nofollow* attribute to external links.
 
+The attribute *rel=noopener noreferrer* is always added to external links to prevent a possible security issue, see [this article](https://medium.com/sedeo/how-to-fix-target-blank-a-security-and-performance-issue-in-web-pages-2118eba1ce2f) for more information.
+
 The extension can be configured in the Admin Control Panel:
 * Allow users to choose for themselves if they would like to open external links in a new window.
 * Or force external links to be opened in a new window for registered users.
