@@ -1,6 +1,6 @@
 # phpBB External Link In New Window extension
 
-This is the repository for the development of the [phpBB 3.2](https://www.phpbb.com/) "External Link In New Window" Extension.
+This is the repository for the development of the [phpBB](https://www.phpbb.com/) "External Link In New Window" Extension.
 
 [![Build Status](https://travis-ci.org/Mar-tin-G/ExternalLinkInNewWindow.svg?branch=master)](https://travis-ci.org/Mar-tin-G/ExternalLinkInNewWindow)
 
