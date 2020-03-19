@@ -68,12 +68,12 @@ class listener implements EventSubscriberInterface
 
 		$url_template_new_window = str_replace(
 			'href="{@url}"',
-			'href="{@url}" target="_blank"',
+			'href="{@url}" target="_blank" rel="noopener noreferrer"',
 			$default_url_template
 		);
 		$url_template_new_window_nofollow = str_replace(
 			'href="{@url}"',
-			'href="{@url}" target="_blank" rel="nofollow"',
+			'href="{@url}" target="_blank" rel="noopener noreferrer nofollow"',
 			$default_url_template
 		);
 
@@ -125,6 +125,6 @@ class listener implements EventSubscriberInterface
 		);
 
 		// add rel="nofollow" attribute if enabled in the ACP
-		$renderer->setParameter('S_NOFOLLOW', $this->config['martin_extlinknewwin_add_ref']);
+		$renderer->setParameter('S_NOFOLLOW', !!$this->config['martin_extlinknewwin_add_ref']);
 	}
 }

@@ -362,7 +362,7 @@ class listener_test extends \phpbb_test_case
 					'S_OPEN_IN_NEW_WINDOW'	=> true,
 					'S_NOFOLLOW'			=> true,
 				),
-				'<a href="http://example.com/" class="postlink" target="_blank" rel="nofollow"></a>',
+				'<a href="http://example.com/" class="postlink" target="_blank" rel="noopener noreferrer nofollow"></a>',
 			),
 			'external link, but nofollow setting is false' => array(
 				'<r><URL url="http://example.com/"></URL></r>',
@@ -370,7 +370,7 @@ class listener_test extends \phpbb_test_case
 					'S_OPEN_IN_NEW_WINDOW'	=> true,
 					'S_NOFOLLOW'			=> false,
 				),
-				'<a href="http://example.com/" class="postlink" target="_blank"></a>',
+				'<a href="http://example.com/" class="postlink" target="_blank" rel="noopener noreferrer"></a>',
 			),
 			'external link, contains target attribute' => array(
 				'<r><URL url="http://example.com/" target="foobar"></URL></r>',
@@ -378,7 +378,7 @@ class listener_test extends \phpbb_test_case
 					'S_OPEN_IN_NEW_WINDOW'	=> true,
 					'S_NOFOLLOW'			=> true,
 				),
-				'<a href="http://example.com/" class="postlink" target="_blank" rel="nofollow"></a>',
+				'<a href="http://example.com/" class="postlink" target="_blank" rel="noopener noreferrer nofollow"></a>',
 			),
 			'external link, contains rel attribute' => array(
 				'<r><URL url="http://example.com/" rel="foobar"></URL></r>',
@@ -386,7 +386,7 @@ class listener_test extends \phpbb_test_case
 					'S_OPEN_IN_NEW_WINDOW'	=> true,
 					'S_NOFOLLOW'			=> true,
 				),
-				'<a href="http://example.com/" class="postlink" target="_blank" rel="nofollow"></a>',
+				'<a href="http://example.com/" class="postlink" target="_blank" rel="noopener noreferrer nofollow"></a>',
 			),
 		);
 	}
