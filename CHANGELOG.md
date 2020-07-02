@@ -2,6 +2,10 @@
 
 ## Version 1.x (for phpBB 3.2/phpBB 3.3)
 
+### v1.2.1 (unreleased) - 2020-07-02
+
+Add french translation, thanks to TazDevilBZH!
+
 ### v1.2.0 - 2020-03-19
 
 Add arabic translation, thanks to alhitary!
